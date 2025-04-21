@@ -2,6 +2,7 @@
 
 @theme {
   --color-Primary: #0167ff;
+  --color-customGreen: #9eff99;
 
   --breakpoint-sm: 64rem; /* 1024px - Smallest Laptop */
   --breakpoint-md: 80rem; /* 1280px - Standard Laptop */

@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-export default function Credentials() {
-  const [username, setUsername] = useState();
-  const [password, setPassword] = useState();
+export default function Credentials({ onLoginSuccess }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
 
@@ -21,6 +21,7 @@ export default function Credentials() {
       if (response.ok) {
         setError(false);
         setMessage(data.message);
+        onLoginSuccess(username); // send username to parent
       } else {
         setError(true);
         setMessage(data.error || "Something went wrong");
@@ -32,7 +33,7 @@ export default function Credentials() {
   };
 
   return (
-    <div className="w-[555px] h-[463px] rounded-[27px] backdrop-blur-xl bg-gradient-to-tl from-white via-transparent to-white opacity-90 shadow-lg relative flex gap-y-[55px] justify-center flex-col items-center">
+    <div className="w-[555px] h-[463px] rounded-[27px] backdrop-blur-xl bg-gradient-to-tl from-gray-300 via-transparent to-gray-300 opacity-90 shadow-lg relative flex gap-y-[55px] justify-center flex-col items-center">
       <div className="text-[36px] text-shadow-black text-white text-center">
         Login
       </div>
@@ -50,7 +51,6 @@ export default function Credentials() {
         onChange={(e) => setPassword(e.target.value)}
         className="w-[70%] h-10 rounded-[12px] backdrop-blur-lg bg-gradient-to-l ring-1 ring-white from-white via-transparent to-white opacity-60 text-center text-white text-[18px] px-4"
       />
-
       <div
         onClick={handleLogin}
         className="w-[45%] h-12 text-[18px] rounded-[12px] text-white cursor-pointer bg-gradient-to-r select-none from-Primary to-blue-500 transition-all duration-500 bg-[length:400%_200%] bg-left hover:bg-right flex items-center justify-center"
