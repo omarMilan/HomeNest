@@ -67,7 +67,7 @@ export default function Dashboard({ username }) {
 
   return (
     <div className="flex flex-col items-center justify-center w-screen h-full text-white">
-      <h1 className="text-3xl mb-4 text-[40px] font-semibold">
+      <h1 className="text-3xl mb-4 text-[40px] max-xl:text-[40px] max-lg:text-[30px] max-md:text-[20px] font-semibold">
         Welcome home, {username}!
       </h1>
       <div className="w-full px-32">
