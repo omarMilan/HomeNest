@@ -66,7 +66,7 @@ This will install:
 
 ### 4. Start the Backend Server
 ```bash
-node index.js
+node server.js
 ```
 
 This will:
