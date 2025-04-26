@@ -1,4 +1,4 @@
-# Travel Booking App
+# HomeNest
 
 This is a full-stack Travel Booking Web Application built with:
 
