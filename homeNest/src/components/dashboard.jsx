@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardBoxes from "./dashboardBoxes";
 import {
   DndContext,
@@ -16,7 +16,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-function SortableItem({ id }) {
+function SortableItem({
+  id,
+  booking_name,
+  location,
+  number_of_bookings,
+  zipcode,
+}) {
   const {
     attributes,
     listeners,
@@ -35,34 +41,95 @@ function SortableItem({ id }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <DashboardBoxes />
+      <DashboardBoxes
+        booking_name={booking_name}
+        location={location}
+        number_of_bookings={number_of_bookings}
+        zipcode={zipcode}
+      />
     </div>
   );
 }
 
-export default function Dashboard({ username }) {
-  const [items, setItems] = useState(["1", "2"]);
-  const [nextId, setNextId] = useState(3); // for generating unique box ids
+export default function Dashboard({ username: initialUsername }) {
+  const [items, setItems] = useState([]);
+
+  const username = localStorage.getItem("username"); // ✅ Always get username fresh
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
   );
 
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3001/listings/${username}`
+        );
+        const data = await response.json();
+        const mapped = data.map((listing, index) => ({
+          id: index.toString(),
+          ...listing,
+        }));
+        setItems(mapped);
+      } catch (error) {
+        console.error("Failed to load listings:", error);
+      }
+    };
+
+    if (username) {
+      fetchListings();
+    }
+  }, [username]);
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
       setItems((items) => {
-        const oldIndex = items.indexOf(active.id);
-        const newIndex = items.indexOf(over.id);
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
     }
   };
 
-  const addNewBox = () => {
-    setItems((prev) => [...prev, nextId.toString()]);
-    setNextId((prev) => prev + 1);
+  const addNewBox = async () => {
+    const booking_name = prompt("Enter Booking Name:");
+    if (!booking_name) return;
+
+    const location = prompt("Enter Location:");
+    if (!location) return;
+
+    const zipcode = prompt("Enter Zip Code:");
+    if (!zipcode) return;
+
+    try {
+      await fetch("http://localhost:3001/add-listing", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          booking_name,
+          location,
+          zipcode,
+        }),
+      });
+
+      const response = await fetch(
+        `http://localhost:3001/listings/${username}`
+      );
+      const data = await response.json();
+      const mapped = data.map((listing, index) => ({
+        id: index.toString(),
+        ...listing,
+      }));
+      setItems(mapped);
+    } catch (error) {
+      console.error("Failed to add listing:", error);
+    }
   };
 
   return (
@@ -72,7 +139,6 @@ export default function Dashboard({ username }) {
       </h1>
       <div className="w-full px-32">
         <div className="h-[505px] bg-[rgba(255,255,255,0.4)] rounded-[12px] flex items-center justify-center gap-4 flex-wrap overflow-auto">
-          {/* Green non-draggable box */}
           <div
             className="w-[320px] h-[191px] bg-customGreen rounded-[6px] flex items-center justify-center cursor-pointer"
             onClick={addNewBox}
@@ -86,13 +152,28 @@ export default function Dashboard({ username }) {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={items}
+              items={items.map((item) => item.id)}
               strategy={horizontalListSortingStrategy}
             >
               <div className="flex gap-4 flex-wrap transition-all duration-300 ease-in-out">
-                {items.map((id) => (
-                  <SortableItem key={id} id={id} />
-                ))}
+                {items.map(
+                  ({
+                    id,
+                    booking_name,
+                    location,
+                    number_of_bookings,
+                    zipcode,
+                  }) => (
+                    <SortableItem
+                      key={id}
+                      id={id}
+                      booking_name={booking_name}
+                      location={location}
+                      number_of_bookings={number_of_bookings}
+                      zipcode={zipcode}
+                    />
+                  )
+                )}
               </div>
             </SortableContext>
           </DndContext>

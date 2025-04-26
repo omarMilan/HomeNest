@@ -21,6 +21,10 @@ export default function Credentials({ onLoginSuccess }) {
       if (response.ok) {
         setError(false);
         setMessage(data.message);
+
+        // ✅ Save username to localStorage
+        localStorage.setItem("username", username);
+
         onLoginSuccess(username);
       } else {
         setError(true);
